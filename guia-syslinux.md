@@ -101,3 +101,160 @@ git config --global credential.helper cache
 Podés entrar a tu repo y ver el archivo en línea en:
 👉 https://github.com/war132812/syslinux-guide
 
+Guía Paso a Paso para Utilizar SYSLINUX
+
+SYSLINUX es un gestor de arranque diseñado para sistemas Linux en medios FAT (USB, disquetes, discos duros). Esta guía cubre su instalación, configuración y uso.
+
+
+
+1. ¿Qué es SYSLINUX?
+SYSLINUX es un cargador de arranque que permite iniciar Linux desde:
+    • Disquetes FAT (SYSLINUX).
+    • CD/DVD (ISOLINUX).
+    • Red PXE (PXELINUX).
+    • Particiones ext2/3/4 (EXTLINUX).
+Ventajas:
+    • No requiere instalación en el MBR.
+    • Configuración simple mediante syslinux.cfg.
+    • Soporte para menús gráficos (vesamenu.c32).
+
+2. Instalación de SYSLINUX
+Requisitos:
+    • Un dispositivo con Instalación en Windowssistema de archivos FAT (USB, disco, etc.).
+    • Kernel de Linux (vmlinuz) y initrd (si es necesario).
+
+
+
+
+Pasos para Instalar SYSLINUX en un USB (Linux)
+    1. Formatear el USB en FAT32:
+       sudo mkfs.vfat -F32 /dev/sdX
+       (Reemplaza /dev/sdX con tu dispositivo USB, verifica con lsblk).
+       
+    2. Montar el USB:
+       sudo mount /dev/sdX /mnt
+       
+    3. Instalar SYSLINUX:
+       sudo syslinux --install /dev/sdX
+       (Para versiones modernas, usa --directory si necesitas una ruta personalizada).
+       
+    4. Copiar archivos necesarios:
+       cp /ruta/al/kernel/vmlinuz /mnt/
+       cp /ruta/al/initrd.img /mnt/
+       
+    5. Desmontar:
+       sudo umount /mnt
+
+
+
+
+
+
+
+
+
+Instalación en Windows
+    1. Descarga syslinux.exe desde syslinux.org.
+    2. Ejecuta en CMD (ejemplo para unidad E:):
+       syslinux.exe -m -a -d /boot/syslinux E:
+
+3. Configuración de syslinux.cfg
+Crea o edita el archivo syslinux.cfg en la raíz del dispositivo (o en /boot/syslinux/).
+Ejemplo Básico:
+plaintext
+DEFAULT linux
+LABEL linux
+  KERNEL vmlinuz
+  APPEND root=/dev/sda1 ro initrd=initrd.img
+Opciones Avanzadas:
+    • Menú Gráfico (vesamenu.c32):
+      plaintext
+      
+      UI vesamenu.c32
+      MENU TITLE Menú de Arranque
+      LABEL Debian
+        MENU LABEL Debian 12
+        KERNEL vmlinuz
+        APPEND root=/dev/sda1 ro initrd=initrd.img
+      LABEL Rescue
+        MENU LABEL Modo Rescate
+        KERNEL vmlinuz
+        APPEND root=/dev/sda1 single
+    • Tiempo de espera:
+      plaintext
+    • TIMEOUT 50  # 5 segundos
+    • Consola Serial:
+      plaintext
+      
+      SERIAL 0 115200
+
+
+4. Personalización
+
+Módulos Útiles:
+Módulo
+Descripción
+menu.c32
+Menú básico.
+vesamenu.c32
+Menú gráfico (requiere VESA).
+chain.c32
+Arranque en cadena (Windows).
+Ejemplo con Módulos:
+plaintext
+
+UI vesamenu.c32
+MENU BACKGROUND splash.png
+LABEL Windows
+  COM32 chain.c32
+  APPEND hd0 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5. Solución de Problemas
+Errores Comunes:
+    1. "Could not find kernel image":
+        ◦ Verifica que vmlinuz esté en la ruta correcta.
+        ◦ Usa rutas absolutas en syslinux.cfg (ej: /boot/vmlinuz).
+    2. "Invalid or corrupt kernel image":
+        ◦ Asegúrate de que el kernel sea compatible (bzImage).
+    3. Problemas con BIOS/UEFI:
+        ◦ Para UEFI, usa syslinux-efi o GRUB.
+        ◦ En BIOS antiguas, usa -s (modo seguro):
+          
+          syslinux -s /dev/sdX
+
+6. Comandos Útiles
+Comando
+Descripción
+syslinux --install
+Instala SYSLINUX en el dispositivo.
+syslinux --update
+Actualiza una instalación existente.
+syslinux --stupid
+Modo compatible con BIOS antiguas.
+
+
+
+
+
+Conclusión
+SYSLINUX es una herramienta poderosa para crear medios de arranque personalizados. Con esta guía, puedes:
+    1. Instalar SYSLINUX en USB/disquetes.
+    2. Configurar syslinux.cfg para múltiples opciones de arranque.
+    3. Personalizar menús y ajustes avanzados.
+Recursos:
+    • Documentación Oficial
+    • Ejemplos de Configuración
+
